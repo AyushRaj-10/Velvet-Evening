@@ -42,7 +42,7 @@ const Form = () => {
         Occasion,
       } = Data;
 
-      const {data} = await axios.post("https://velvet-evening.onrender.com", {
+      const {data} = await axios.post("https://velvet-evening.onrender.com/reserve", {
         Name,
         Email,
         Phone,
