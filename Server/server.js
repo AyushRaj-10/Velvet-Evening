@@ -11,12 +11,13 @@ app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 
 app.use(cors({
-    origin: "https://velvet-evening.vercel.app/",
-    methods:["POST"],
-    credentials:true
-}))
+  origin: "https://velvet-evening.vercel.app",
+  methods: ["GET", "POST", "OPTIONS"],
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
-app.use('/reserve', async(req,res) => {
+app.post('/reserve', async(req,res) => {
     const {
       Name,
       Email,
