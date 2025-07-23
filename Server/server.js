@@ -1,14 +1,16 @@
-import express from 'express'
-import cors from 'cors'
-import dotenv from 'dotenv'
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
 import { sendMail } from './utils/sendMail.js';
 
 dotenv.config();
 
-const app = express()
+const app = express();
+const PORT = process.env.PORT || 8000;
 
-app.use(express.json())
-app.use(express.urlencoded({extended:true}))
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const allowedOrigins = [
   "https://velvet-evening.vercel.app",
@@ -26,70 +28,62 @@ app.use(cors({
   credentials: true
 }));
 
-app.options('*', cors());
+// Optional: To prevent GET /reserve from throwing 500 error
+app.get('/reserve', (req, res) => {
+  res.status(200).json({ message: 'Reservation endpoint is live. Use POST.' });
+});
 
+// POST /reserve
+app.post('/reserve', async (req, res) => {
+  const {
+    Name,
+    Email,
+    Phone,
+    Date,
+    Time,
+    Guest,
+    Request,
+    Preferred,
+    Occasion
+  } = req.body;
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-}));
+  if (!Name || !Email || !Phone || !Date || !Time || !Guest) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required fields",
+    });
+  }
 
-// ✅ Handle preflight requests
-app.options('*', cors());
+  try {
+    await sendMail({
+      data: {
+        Name,
+        Email,
+        Phone,
+        Date,
+        Time,
+        Guest,
+        Request,
+        Preferred,
+        Occasion,
+      }
+    });
 
-app.post('/reserve', async(req,res) => {
-    const {
-      Name,
-      Email,
-      Phone,
-      Date,
-      Time,
-      Guest,
-      Request,
-      Preferred,
-      Occasion
-    } = req.body;
-  
-    try {
-      await sendMail({
-        data: {
-          Name,
-          Email,
-          Phone,
-          Date,
-          Time,
-          Guest,
-          Request,
-          Preferred,
-          Occasion,
-        }
-      });
-  
-      return res.status(200).json({
-        success: true,
-        message: "Message sent successfully.",
-      });
-    } catch (error) {
-      console.error("Send mail error:", error);
-      return res.status(500).json({
-        success: false,
-        message: "Internal Server Error",
-        error: error.message,
-      });
-    }
-  });
-  
+    return res.status(200).json({
+      success: true,
+      message: "Message sent successfully.",
+    });
+  } catch (error) {
+    console.error("Send mail error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+});
 
-app.listen(8000, () => {
-    try {
-        console.log(`Connect to port ${process.env.PORT}`)
-    } catch (error) {
-        console.log("Error in port connection")
-    }
-})
+// Server start
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
