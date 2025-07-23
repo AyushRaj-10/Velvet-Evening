@@ -8,6 +8,13 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8000;
 
+app.get('/reserve', (req, res) => {
+  return res.status(200).json({
+    success: true,
+    message: 'GET is supported. Please use POST to submit a reservation.',
+  });
+});
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -27,11 +34,6 @@ app.use(cors({
   },
   credentials: true
 }));
-
-// Optional: To prevent GET /reserve from throwing 500 error
-app.get('/reserve', (req, res) => {
-  res.status(200).json({ message: 'Reservation endpoint is live. Use POST.' });
-});
 
 // POST /reserve
 app.post('/reserve', async (req, res) => {
