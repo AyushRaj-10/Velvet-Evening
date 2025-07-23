@@ -17,6 +17,8 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
+app.options("*", cors());
+
 app.post('/reserve', async(req,res) => {
     const {
       Name,
