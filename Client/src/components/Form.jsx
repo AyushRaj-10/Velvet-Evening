@@ -74,8 +74,8 @@ const Form = () => {
         });
       
     } catch (error) {
-      toast.error(error.response.data.message),{
-        autoClose: 2000,
+      toast.error("Something went wrong.",{
+        autoClose: 2000,)
       };
     }
 
